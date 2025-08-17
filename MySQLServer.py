@@ -1,5 +1,5 @@
 # MySQLServer.py
-# Create the database 'alx_book_store' without using SELECT/SHOW.
+# Create the database 'alx_book_store'.
 
 import os
 import sys
