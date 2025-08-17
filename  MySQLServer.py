@@ -1,64 +1,61 @@
 # MySQLServer.py
+# Create the database 'alx_book_store' without using SELECT/SHOW.
+
 import os
 import sys
 
 try:
     import mysql.connector
-    from mysql.connector import Error
 except Exception as e:
-    print("Error: mysql-connector-python is not installed. Install it with:\n"
-          "  pip install mysql-connector-python", file=sys.stderr)
+    print(f"Error importing mysql.connector: {e}")
     sys.exit(1)
 
-DB_NAME = "alx_book_store"
-
 def main():
-    """
-    Creates the MySQL database `alx_book_store` if it does not already exist.
-    No SELECT or SHOW statements are used.
-    Prints a success message or an error to stderr on failure.
-    Ensures the connection is opened and closed properly.
-    """
+    DB_NAME = "alx_book_store"
+
     # Read connection details from environment variables (with sensible defaults)
-    config = {
-        "host": os.getenv("MYSQL_HOST", "localhost"),
-        "port": int(os.getenv("MYSQL_PORT", "3306")),
-        "user": os.getenv("MYSQL_USER", "root"),
-        "password": os.getenv("MYSQL_PASSWORD", "")
-    }
+    host = os.getenv("MYSQL_HOST", "localhost")
+    user = os.getenv("MYSQL_USER", "root")
+    password = os.getenv("MYSQL_PASSWORD") or os.getenv("MYSQL_PWD") or ""
+    port = int(os.getenv("MYSQL_PORT", "3306"))
 
     conn = None
     cursor = None
 
     try:
-        # Connect to the MySQL server (not to a specific database yet)
-        conn = mysql.connector.connect(**config)
-        conn.autocommit = True  # Ensure CREATE DATABASE is committed immediately
+        # Connect to server (not a specific DB yet)
+        conn = mysql.connector.connect(
+            host=host,
+            user=user,
+            password=password,
+            port=port,
+        )
         cursor = conn.cursor()
 
-        # Create the database if it doesn't exist (no SELECT/SHOW)
+        # No SELECT/SHOW; use IF NOT EXISTS so it won't fail if DB exists
         cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_NAME}")
+        # Optional: commit is not strictly necessary for DDL in MySQL, but harmless
+        conn.commit()
 
+        # Required success message
         print(f"Database '{DB_NAME}' created successfully!")
 
-    except Error as err:
-        # Print error message for connection/operation failures
-        print(f"Error: {err}", file=sys.stderr)
+    except mysql.connector.Error as err:
+        # Print error message for connection/creation errors
+        print(f"Error connecting to the DB or creating database: {err}")
         sys.exit(1)
-
     finally:
-        # Clean up: close cursor and connection
-        try:
-            if cursor is not None:
+        # Ensure proper cleanup
+        if cursor is not None:
+            try:
                 cursor.close()
-        except Exception:
-            pass
-
-        try:
-            if conn is not None and conn.is_connected():
+            except Exception:
+                pass
+        if conn is not None:
+            try:
                 conn.close()
-        except Exception:
-            pass
+            except Exception:
+                pass
 
 if __name__ == "__main__":
     main()
