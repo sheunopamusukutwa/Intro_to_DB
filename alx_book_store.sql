@@ -45,12 +45,7 @@ CREATE TABLE Orders (
   customer_id INT UNSIGNED NOT NULL,
   order_date DATE NOT NULL,
   PRIMARY KEY (order_id),
-  KEY idx_orders_customer_id (customer_id),
-  CONSTRAINT fk_orders_customer
-    FOREIGN KEY (customer_id)
-    REFERENCES Customers(customer_id)
-    ON UPDATE CASCADE
-    ON DELETE RESTRICT
+  FOREIGN KEY (customer_id) REFERENCES Customers(customer_id)
 ) ENGINE=InnoDB;
 
 -- ORDER_DETAILS
